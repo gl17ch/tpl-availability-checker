@@ -5,14 +5,18 @@ const URL = 'https://epass-ca.quipugroup.net/?clientID=16&libraryID=1';
 const SOLD_OUT = 'All passes for this attraction have been reserved. Check back for new passes.';
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
+  const browser = await chromium.launch({
+    executablePath: process.env.CHROMIUM_PATH || undefined,
+    proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY } : undefined,
+    args: ['--ignore-certificate-errors'], // proxy re-signs TLS with its own CA
+  });
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
-  await page.goto(URL, { waitUntil: 'networkidle' });
+  await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForSelector('#ePASSPatronNumber', { timeout: 60000 });
   await page.fill('#ePASSPatronNumber', process.env.EPASS_USER);
   await page.fill('#ePASSPatronPassword', process.env.EPASS_PASS);
   await page.click('#ePASSButtonLogin');
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(10000);
   const text = await page.evaluate(() => document.body.innerText);
   await browser.close();
 
@@ -26,5 +30,6 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   });
   const available = Object.keys(result).filter(k => result[k]);
   const reserved = Object.keys(result).filter(k => !result[k]);
+  if (process.env.DUMP) require('fs').writeFileSync(process.env.DUMP, text);
   console.log(JSON.stringify({ available, reserved }, null, 2));
 })();
