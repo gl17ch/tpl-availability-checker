@@ -5,9 +5,10 @@ const URL = 'https://epass-ca.quipugroup.net/?clientID=16&libraryID=1';
 const SOLD_OUT = 'All passes for this attraction have been reserved. Check back for new passes.';
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY } : undefined });
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
-  await page.goto(URL, { waitUntil: 'networkidle' });
+  await page.goto(URL, { waitUntil: 'commit', timeout: 60000 });
+  await page.waitForSelector('#ePASSPatronNumber', { timeout: 60000 });
   await page.fill('#ePASSPatronNumber', process.env.EPASS_USER);
   await page.fill('#ePASSPatronPassword', process.env.EPASS_PASS);
   await page.click('#ePASSButtonLogin');
