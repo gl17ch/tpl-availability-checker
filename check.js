@@ -26,5 +26,6 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   });
   const available = Object.keys(result).filter(k => result[k]);
   const reserved = Object.keys(result).filter(k => !result[k]);
+  require('fs').writeFileSync(process.env.DUMP || '/dev/null', text);
   console.log(JSON.stringify({ available, reserved }, null, 2));
 })();
