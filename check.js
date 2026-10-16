@@ -11,8 +11,8 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   await page.fill('#ePASSPatronNumber', process.env.EPASS_USER);
   await page.fill('#ePASSPatronPassword', process.env.EPASS_PASS);
   await page.click('#ePASSButtonLogin');
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(5000);
+  await page.waitForFunction(() => /attractions? found/.test(document.body.innerText), null, { timeout: 60000 });
+  await page.waitForTimeout(3000);
   const text = await page.evaluate(() => document.body.innerText);
   await browser.close();
 
