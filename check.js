@@ -8,11 +8,13 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   await page.goto(URL, { waitUntil: 'networkidle' });
-  await page.fill('#ePASSPatronNumber', process.env.EPASS_USER);
-  await page.fill('#ePASSPatronPassword', process.env.EPASS_PASS);
+  await page.click('#ePASSPatronNumber');
+  await page.keyboard.type(process.env.EPASS_USER, { delay: 30 });
+  await page.click('#ePASSPatronPassword');
+  await page.keyboard.type(process.env.EPASS_PASS, { delay: 30 });
   await page.click('#ePASSButtonLogin');
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(8000);
   const text = await page.evaluate(() => document.body.innerText);
   await browser.close();
 
@@ -26,5 +28,7 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   });
   const available = Object.keys(result).filter(k => result[k]);
   const reserved = Object.keys(result).filter(k => !result[k]);
-  console.log(JSON.stringify({ available, reserved }, null, 2));
+  const WANT = ['tafelmusik','toronto symphony orchestra','royal conservatory of music','inter toronto football club','etobicoke philharmonic orchestra','hot docs cinema','ontario science centre','reptelia','reptilia',"ripley's aquarium of canada",'the village at black creek'];
+  const wanted = available.filter(k => WANT.some(w => k.toLowerCase().replace(/’/g, "'").includes(w)));
+  console.log(JSON.stringify({ wanted, available, reserved }, null, 2));
 })();
