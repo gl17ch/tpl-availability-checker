@@ -1,6 +1,6 @@
 // Logs in to tpl:map (ePASS), scrapes the attractions page and reports availability.
 // Usage: EPASS_USER=... EPASS_PASS=... node check.js   (requires playwright)
-const { chromium } = require('playwright');
+const { chromium } = require('playwright-core');
 const URL = 'https://epass-ca.quipugroup.net/?clientID=16&libraryID=1';
 const SOLD_OUT = 'All passes for this attraction have been reserved. Check back for new passes.';
 
@@ -14,6 +14,7 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(5000);
   const text = await page.evaluate(() => document.body.innerText);
+  if (process.env.DUMP) require('fs').writeFileSync(process.env.DUMP, text);
   await browser.close();
 
   // An attraction's name is the line before its "Mobile or ... Pass" line.
