@@ -4,6 +4,9 @@ const { chromium } = require('playwright');
 const URL = 'https://epass-ca.quipugroup.net/?clientID=16&libraryID=1';
 const SOLD_OUT = 'All passes for this attraction have been reserved. Check back for new passes.';
 
+const WATCHLIST = ['Tafelmusik', 'Toronto Symphony Orchestra', 'Royal Conservatory of Music', 'Toronto FC',
+  'Etobicoke Philharmonic', 'Hot Docs', 'Ontario Science Centre', 'Reptilia', "Ripley's Aquarium"];
+
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
@@ -24,7 +27,10 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
     if ((lines[i + 1] || '').startsWith('Mobile or')) { cur = l.trim(); result[cur] = true; }
     else if (cur && l.includes(SOLD_OUT)) result[cur] = false;
   });
-  const available = Object.keys(result).filter(k => result[k]);
-  const reserved = Object.keys(result).filter(k => !result[k]);
-  console.log(JSON.stringify({ available, reserved }, null, 2));
+  const norm = s => s.toLowerCase().replace(/[’']/g, "'").trim();
+  const watched = WATCHLIST.map(w => ({ w, key: Object.keys(result).find(k => norm(k).includes(norm(w))) }));
+  const available = watched.filter(x => x.key && result[x.key]).map(x => x.key);
+  const reserved = watched.filter(x => x.key && !result[x.key]).map(x => x.key);
+  const notListed = watched.filter(x => !x.key).map(x => x.w);
+  console.log(JSON.stringify({ available, reserved, notListed }, null, 2));
 })();
