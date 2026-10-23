@@ -4,6 +4,10 @@ const { chromium } = require('playwright');
 const URL = 'https://epass-ca.quipugroup.net/?clientID=16&libraryID=1';
 const SOLD_OUT = 'All passes for this attraction have been reserved. Check back for new passes.';
 
+const WATCH = ['Tafelmusik', 'Toronto Symphony Orchestra', 'Royal Conservatory of Music', 'Inter Toronto Football Club',
+  'Etobicoke Philharmonic Orchestra', 'Hot Docs Cinema', 'Ontario Science Centre', 'Reptilia', "Ripley's Aquarium of Canada"];
+const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
@@ -26,5 +30,7 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   });
   const available = Object.keys(result).filter(k => result[k]);
   const reserved = Object.keys(result).filter(k => !result[k]);
-  console.log(JSON.stringify({ available, reserved }, null, 2));
+  const watched = available.filter(k => WATCH.some(w => norm(k).includes(norm(w))));
+  const notListed = WATCH.filter(w => !Object.keys(result).some(k => norm(k).includes(norm(w))));
+  console.log(JSON.stringify({ watchedAvailable: watched, watchedNotListed: notListed, available, reserved }, null, 2));
 })();
