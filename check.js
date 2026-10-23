@@ -14,6 +14,7 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(5000);
   const text = await page.evaluate(() => document.body.innerText);
+  if (process.env.DUMP) require("fs").writeFileSync(process.env.DUMP, text);
   await browser.close();
 
   // An attraction's name is the line before its "Mobile or ... Pass" line.
