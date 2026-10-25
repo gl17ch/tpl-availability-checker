@@ -26,5 +26,8 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   });
   const available = Object.keys(result).filter(k => result[k]);
   const reserved = Object.keys(result).filter(k => !result[k]);
-  console.log(JSON.stringify({ available, reserved }, null, 2));
+  const WATCH = ['tafelmusik', 'toronto symphony orchestra', 'royal conservatory of music', 'inter toronto', 'etobicoke philharmonic', 'hot docs', 'ontario science centre', 'reptilia', 'reptelia', "ripley's aquarium"];
+  const watched = n => WATCH.some(w => n.toLowerCase().includes(w));
+  const watchedAvailable = available.filter(watched);
+  console.log(JSON.stringify({ watchedAvailable, available, reserved }, null, 2));
 })();
