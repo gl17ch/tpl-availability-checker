@@ -3,4 +3,6 @@
 `check.js` logs in to tpl:map (ePASS) and lists which attractions still have passes.
 An attraction is available if "All passes for this attraction have been reserved." is not shown under it.
 
+`node check.js --watch` polls every 5 minutes and exits when a target attraction is available.
+
 Credentials come from env vars `EPASS_USER` and `EPASS_PASS` (never commit them). Notification CCs use `epass_cc1`, `epass_cc2`, ...
