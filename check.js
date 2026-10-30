@@ -14,6 +14,7 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(5000);
   const text = await page.evaluate(() => document.body.innerText);
+  require('fs').writeFileSync(process.env.SCRAPE_OUT || 'page.txt', text);
   await browser.close();
 
   // An attraction's name is the line before its "Mobile or ... Pass" line.
@@ -24,7 +25,10 @@ const SOLD_OUT = 'All passes for this attraction have been reserved. Check back 
     if ((lines[i + 1] || '').startsWith('Mobile or')) { cur = l.trim(); result[cur] = true; }
     else if (cur && l.includes(SOLD_OUT)) result[cur] = false;
   });
-  const available = Object.keys(result).filter(k => result[k]);
-  const reserved = Object.keys(result).filter(k => !result[k]);
+  const WATCH = ['tafelmusik', 'toronto symphony orchestra', 'royal conservatory of music', 'inter toronto football club',
+    'etobicoke philharmonic orchestra', 'hot docs cinema', 'ontario science centre', 'reptelia', 'reptilia', "ripley's aquarium of canada"];
+  const watched = Object.keys(result).filter(k => WATCH.some(w => k.toLowerCase().replace(/[’‘]/g, "'").includes(w)));
+  const available = watched.filter(k => result[k]);
+  const reserved = watched.filter(k => !result[k]);
   console.log(JSON.stringify({ available, reserved }, null, 2));
 })();
